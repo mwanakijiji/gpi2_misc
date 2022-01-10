@@ -9,6 +9,9 @@ systemctl daemon-reload
 vncpasswd root
 vncserver
 
+# start IDL (development environment)
+idlde
+
 # get stuff from cpogpi computers
 wget -v https://mwanakijiji.github.io/cv_20210926.pdf
 
