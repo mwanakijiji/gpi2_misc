@@ -1,0 +1,5 @@
+Cmnd_Alias MYSERVICE = \
+    /bin/systemctl enable vncserver_root@:2.service, \
+    /bin/systemctl disable vncserver_root@:2.service
+
+gpi ALL = (root) NOPASSWD: MYSERVICE
