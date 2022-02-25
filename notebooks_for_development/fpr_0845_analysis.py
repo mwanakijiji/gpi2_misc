@@ -87,6 +87,12 @@ y_best = np.add(np.multiply(m,x_best),b)
 print("Best-fit counts at integration time of zero:")
 print(y_best[0])
 
+print("Ratio of integration times:")
+print(np.divide(int_full,np.mean([int_sub1,int_sub2])))
+
+print("Ratio of counts:")
+print(np.divide(sum_full_subsec,np.mean([sum_sub1,sum_sub2])))
+
 plt.plot(x_best,y_best,linestyle="--")
 plt.scatter(int_array,illum_array)
 plt.xlabel("Integration time (sec)")

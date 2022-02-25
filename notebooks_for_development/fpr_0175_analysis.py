@@ -105,7 +105,7 @@ plt.plot(test_H[0],np.divide(test_H[1],np.max(test_H[1])))
 plt.xlabel("Wavelength (um)")
 plt.ylabel("Normalized transmission")
 plt.savefig("junk_H_band.png")
-
+plt.clf()
 
 # In[22]:
 
@@ -115,7 +115,7 @@ plt.plot(test_J[0],np.divide(test_J[1],np.max(test_J[1])))
 plt.xlabel("Wavelength (um)")
 plt.ylabel("Normalized transmission")
 plt.savefig("junk_J_band.png")
-
+plt.clf()
 
 # In[27]:
 
@@ -125,7 +125,7 @@ plt.plot(test_Y[0],np.divide(test_Y[1],np.max(test_Y[1])))
 plt.xlabel("Wavelength (um)")
 plt.ylabel("Normalized transmission")
 plt.savefig("junk_J_band.png")
-
+plt.clf()
 
 # In[24]:
 
@@ -135,7 +135,7 @@ plt.plot(test_K1[0],np.divide(test_K1[1],np.max(test_K1[1])))
 plt.xlabel("Wavelength (um)")
 plt.ylabel("Normalized transmission")
 plt.savefig("junk_K1_band.png")
-
+plt.clf()
 
 # In[28]:
 
@@ -146,7 +146,7 @@ plt.xlabel("Wavelength (um)")
 plt.ylabel("Normalized transmission")
 plt.title("K2-band")
 plt.savefig("junk_K2_band.png")
-
+plt.clf()
 
 # In[ ]:
 
