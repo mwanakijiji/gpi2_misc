@@ -62,7 +62,7 @@ for num_foc in range(0,len(foc_lens_1_test)):
                                 )
 
     # find (abs val of) magnifications
-    mag_array = np.divide(si_1_array,so_1_array)
+    mag_1_array = np.divide(si_1_array,so_1_array)
 
     # locations of lens 1 focal points (relative to current lens)
     loc_lens1_fpt_rel = np.add(del_x_lens,foc_lens_1_test[num_foc])
@@ -77,13 +77,15 @@ for num_foc in range(0,len(foc_lens_1_test)):
     loc_Barlow_abs = np.subtract(loc_lens1_fpt_abs,upstr_Barlow_dist)
     # the focal length required to image the FT on the same detector
     # if the Barlow lens is in
-    foc_lens2_Barlow = f_needed(so_pass=-upstr_Barlow_dist,
-                        si_pass=np.subtract(del_x_detect+loc_detector_current,loc_Barlow_abs))
-
-    # remove all negative values, because they are unphysical (Barlow
-    # downstream of the focal point)
-    #idx_unphysical = Barlow_rel_lens1foc<0
-    #foc_lens2_Barlow[idx_unphysical] = np.nan
+    so_2 = -upstr_Barlow_dist
+    # second image distance is that of the new detector location minus the Barlow location
+    si_2 = np.subtract(del_x_detect+loc_detector_current,loc_Barlow_abs)
+    foc_lens2_Barlow = f_needed(so_pass=so_2,
+                        si_pass=si_2)
+    mag_2_array = -np.divide(si_2,so_2) # magnification effect of Barlow alone
+    #import ipdb; ipdb.set_trace()
+    # calculate plate scale at FT{Lyot} plane IF the Barlow is in
+    #PS_w_Barlow = np.divide(1.,np.multiply(foc_lens_1_test,mag_2_array))
 
     # print FYI stuff
     print("-----------------")
@@ -91,16 +93,22 @@ for num_foc in range(0,len(foc_lens_1_test)):
     #import ipdb; ipdb.set_trace()
     df = pd.DataFrame(del_x_lens, columns=["del_x_lens"])
     df["del_x_detect"] = del_x_detect
-    df["mag_array"] = mag_array
-    df["si"] = si_1_array
-    df["so"] = so_1_array
+    df["M_1_array"] = mag_1_array
+    df["M_2_array"] = mag_2_array
+    df["si_1"] = si_1_array
+    df["so_1"] = so_1_array
+    df["si_2"] = si_2
+    df["so_2"] = so_2
+    df["loc_Barlow_abs"] = loc_Barlow_abs
+    #df["PS_w_Barlow"] = PS_w_Barlow
+    df["foc_lens2_Barlow"] = foc_lens2_Barlow
     print(df)
 
     plt.clf()
     fig, ax1 = plt.subplots(1, 1, figsize=(15,5))
 
     # annotate magnifications
-    for i, txt in enumerate(mag_array):
+    for i, txt in enumerate(mag_1_array):
         if (np.round(txt,3) > abs_mag_max):
             # exceeds limit of magnification
             color_string = "r"
