@@ -52,6 +52,8 @@ abs_mag_max = 0.6912 # mag for filling 90% of shortest dimension (buffer of 5% o
 # loop over possible focal lengths of lens 1
 for num_foc in range(0,len(foc_lens_1_test)):
 
+    string_foc = str(foc_lens_1_test[num_foc]).replace(".","_")
+
     # find the si array (distance of image from lens)
     si_1_array = si(so_pass = so_1_array, f_pass = foc_lens_1_test[num_foc])
 
@@ -87,6 +89,12 @@ for num_foc in range(0,len(foc_lens_1_test)):
     # calculate plate scale at FT{Lyot} plane IF the Barlow is in
     #PS_w_Barlow = np.divide(1.,np.multiply(foc_lens_1_test,mag_2_array))
 
+    # consider a two-positive-lens solution (without a Barlow lens) and
+    # find the distance between the focal point of lens 1 and the detector;
+    # then any positive lens 2 that is inserted needs to have a positive focal
+    # length less than this; this info is printed, but not plotted
+    dist_lens_1_det = np.subtract(del_x_detect+loc_detector_current,loc_lens1_fpt_abs)
+
     # print FYI stuff
     print("-----------------")
     print("f = " + str(foc_lens_1_test[num_foc]))
@@ -99,10 +107,12 @@ for num_foc in range(0,len(foc_lens_1_test)):
     df["so_1"] = so_1_array
     df["si_2"] = si_2
     df["so_2"] = so_2
+    df["dist_lens_1_det"] = dist_lens_1_det
     df["loc_Barlow_abs"] = loc_Barlow_abs
     #df["PS_w_Barlow"] = PS_w_Barlow
     df["foc_lens2_Barlow"] = foc_lens2_Barlow
     print(df)
+    df.to_csv("figs/" + string_foc + ".txt")
 
     plt.clf()
     fig, ax1 = plt.subplots(1, 1, figsize=(15,5))
@@ -118,9 +128,8 @@ for num_foc in range(0,len(foc_lens_1_test)):
     # annotate Barlow focal lengths
     for i, txt2 in enumerate(foc_lens2_Barlow):
         ax1.annotate("f_B = "+str(np.round(txt2,3)), (del_x_lens[i], 67+del_x_detect[i]), color="k", rotation=90)
-    ax1.scatter(del_x_lens,del_x_detect, color="b")
-    # indicate locations of FT{Lyot}
-    ax1.scatter(loc_lens1_fpt_rel, del_x_detect,color="r")
+    ax1.scatter(del_x_lens, del_x_detect, color="b")
+
     # indicate locations of Barlow lens (note subtraction, because x-axis is relative to current lens 1)
     ax1.scatter(np.subtract(loc_Barlow_abs,loc_R1_lens_current), del_x_detect,color="k")
     ax1.set_xlabel("lens 1 displacement (mm)")
@@ -160,6 +169,8 @@ for num_foc in range(0,len(foc_lens_1_test)):
 
     # add absolute x axis
     ax2 = ax1.twiny()
+    # indicate locations of FT{Lyot}
+    ax2.scatter(loc_lens1_fpt_abs, del_x_detect, color="r")
     ax2.set_xticks( ax1.get_xticks() )
     ax2.set_xbound(ax1.get_xbound())
     ax2.set_xticklabels([loc_R1_lens_current+x for x in ax1.get_xticks()])
@@ -176,7 +187,6 @@ for num_foc in range(0,len(foc_lens_1_test)):
 
     plt.suptitle("lens 1 physical f = " + str(foc_lens_1_test[num_foc]) + " mm")
 
-    string_foc = str(foc_lens_1_test[num_foc]).replace(".","_")
     string_full = "figs/" + string_foc + ".png"
     plt.tight_layout()
     plt.savefig(string_full, edgecolor="white")
