@@ -21,3 +21,19 @@ def si(so_pass,f_pass):
     si_result = np.divide(so_pass,np.subtract(np.divide(so_pass,f_pass),1.))
 
     return si_result
+
+# set the new location of the relay lens 1
+loc_lens1_abs = loc_R1_lens_current
+
+# set a focal length so that the FT{Lyot} is just downstream of the current detector location
+# (this gives us some room, so that we can move the detector back and capture that image)
+
+detect_downstream_offset = 5. # (mm)
+f1_new = loc_detector_current - loc_lens1_abs + detect_downstream_offset
+
+print(f1_new)
+
+# location of the plane for imaging FT{Lyot}
+loc_FTlyot_abs = loc_lens1_abs + f1_new
+
+print(loc_FTlyot_abs)
