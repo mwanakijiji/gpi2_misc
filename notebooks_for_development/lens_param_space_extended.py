@@ -89,11 +89,23 @@ for num_foc in range(0,len(foc_lens_1_test)):
     # calculate plate scale at FT{Lyot} plane IF the Barlow is in
     #PS_w_Barlow = np.divide(1.,np.multiply(foc_lens_1_test,mag_2_array))
 
+    # absolute location of second image
+    si_2_abs = np.add(loc_lens1_fpt_abs,np.add(foc_lens2_Barlow,si_2))
+
+    # absolute location of detector
+    loc_det_abs = np.add(del_x_detect,loc_detector_current)
+
     # consider a two-positive-lens solution (without a Barlow lens) and
     # find the distance between the focal point of lens 1 and the detector;
     # then any positive lens 2 that is inserted needs to have a positive focal
     # length less than this; this info is printed, but not plotted
-    dist_lens_1_det = np.subtract(del_x_detect+loc_detector_current,loc_lens1_fpt_abs)
+    dist_focpt1_det = np.subtract(loc_det_abs,loc_lens1_fpt_abs)
+
+    # absolute location of lens 1
+    loc_lens1_abs = np.add(del_x_lens,loc_R1_lens_current)
+
+    # plate scale of FT{Lyot} image on final detector: 1/(M2*f1); then convert to asec/mm
+    PS_FTlyot = np.divide(1.,np.multiply(foc_lens_1_test[num_foc],mag_2_array)) * (3600.*360./(2.*np.pi))
 
     # print FYI stuff
     print("-----------------")
@@ -101,13 +113,17 @@ for num_foc in range(0,len(foc_lens_1_test)):
     #import ipdb; ipdb.set_trace()
     df = pd.DataFrame(del_x_lens, columns=["del_x_lens"])
     df["del_x_detect"] = del_x_detect
+    df["loc_detect_abs"] = loc_det_abs
     df["M_1_array"] = mag_1_array
     df["M_2_array"] = mag_2_array
     df["si_1"] = si_1_array
     df["so_1"] = so_1_array
     df["si_2"] = si_2
+    df["si_2_abs"] = si_2_abs
     df["so_2"] = so_2
-    df["dist_lens_1_det"] = dist_lens_1_det
+    df["PS_FTlyot"] = PS_FTlyot # (asec/mm)
+    df["loc_lens1_fpt_abs"] = loc_lens1_fpt_abs
+    df["dist_focpt1_det"] = dist_focpt1_det
     df["loc_Barlow_abs"] = loc_Barlow_abs
     #df["PS_w_Barlow"] = PS_w_Barlow
     df["foc_lens2_Barlow"] = foc_lens2_Barlow
@@ -115,7 +131,7 @@ for num_foc in range(0,len(foc_lens_1_test)):
     df.to_csv("figs/" + string_foc + ".txt")
 
     plt.clf()
-    fig, ax1 = plt.subplots(1, 1, figsize=(15,5))
+    fig, ax1 = plt.subplots(1, 1, figsize=(15,10))
 
     # annotate magnifications
     for i, txt in enumerate(mag_1_array):
@@ -124,64 +140,77 @@ for num_foc in range(0,len(foc_lens_1_test)):
             color_string = "r"
         else:
             color_string = "k"
-        ax1.annotate("M_1 = "+str(np.round(txt,3)) + ", ", (del_x_lens[i], 7+del_x_detect[i]), color=color_string, rotation=90)
+        ax1.annotate("M_1 = "+str(np.round(txt,3)) + ", ", (loc_lens1_abs[i], 7+loc_det_abs[i]), color=color_string, rotation=90)
     # annotate Barlow focal lengths
     for i, txt2 in enumerate(foc_lens2_Barlow):
-        ax1.annotate("f_B = "+str(np.round(txt2,3)), (del_x_lens[i], 67+del_x_detect[i]), color="k", rotation=90)
-    ax1.scatter(del_x_lens, del_x_detect, color="b")
+        ax1.annotate("f_B = "+str(np.round(txt2,3)), (loc_lens1_abs[i], 107+loc_det_abs[i]), color="k", rotation=90)
+
+    # new locations of detector
+    ax1.scatter(loc_lens1_abs, loc_det_abs, color="b")
+
+    # indicate locations of FT{Lyot}
+    # (the y here is just to point the datapoint in a visually OK place)
+    ax1.scatter(loc_lens1_fpt_abs, loc_det_abs, color="r")
 
     # indicate locations of Barlow lens (note subtraction, because x-axis is relative to current lens 1)
-    ax1.scatter(np.subtract(loc_Barlow_abs,loc_R1_lens_current), del_x_detect,color="k")
-    ax1.set_xlabel("lens 1 displacement (mm)")
-    ax1.set_ylabel("blue: detector displacement (mm)\nred: location of focus of lens 1 FT{Lyot} plane\nblack: location of Barlow lens")
+    # (the y here is just to point the datapoint in a visually OK place)
+    ax1.scatter(loc_Barlow_abs, loc_det_abs, color="k")
+    ax1.set_ylabel("Blue: absolute detector position (from mirror)")
+
 
     # indicate 1 focal length away from lens, where we expect FT{Lyot} to be
     #ft_pos_line = np.add(del_x_lens,foc_lens_1_test[num_foc])
     #ax1.annotate("FT location", (del_x_lens[1],ft_pos_line[1]), color="k")
     #ax1.plot(del_x_lens, ft_pos_line, color="k", linestyle=":")
     #ax1.fill_between(del_x_lens, -100, 0, color="gray")
-    ax1.set_ylim([0,200])
+    ax1.set_ylim([0,500])
     #ax1.set_title("Lens inside dewar")
 
     # current lens 1
-    ax1.annotate("current lens 1", (0,2), color="k")
-    ax1.axvline(x=0, color="gray", linestyle="--")
+    ax1.annotate("current lens 1", (loc_R1_lens_current,100), color="k")
+    ax1.axvline(x=loc_R1_lens_current, color="gray", linestyle="--")
     #ax1.annotate("current detect", (-5,116.05), color="k")
     #ax1.axhline(y=116.05, color="gray", linestyle="--")
 
     # cold shield
-    ax1.annotate("cold shield", (44.35,2), color="k")
-    ax1.axvline(x=loc_cold_shield-loc_R1_lens_current, color="gray", linestyle="--")
+    ax1.annotate("cold shield", (loc_cold_shield,100), color="k")
+    ax1.axvline(x=loc_cold_shield, color="gray", linestyle="--")
     #ax1.annotate("cold shield", (-5,44.35), color="k")
     #ax1.axhline(y=44.35, color="gray", linestyle="--")
 
     # dewar window
-    ax1.annotate("dewar window", (98.95,2), color="k")
-    ax1.axvline(x=loc_dewar_window-loc_R1_lens_current, color="gray", linestyle="--")
+    ax1.annotate("dewar window", (loc_dewar_window,100), color="k")
+    ax1.axvline(x=loc_dewar_window, color="gray", linestyle="--")
     #ax1.annotate("dewar window", (-5,98.95), color="k")
     #ax1.axhline(y=98.95, color="gray", linestyle="--")
 
+    # indicate new detector location
+    #ax1.axvline(x=loc_det_abs
+
     # current detector
-    ax1.annotate("current detect", (116.05,2), color="k")
-    ax1.axvline(x=loc_detector_current-loc_R1_lens_current, color="gray", linestyle="--")
+    ax1.annotate("current detect", (loc_detector_current,100), color="k")
+    ax1.axvline(x=loc_detector_current, color="gray", linestyle="--")
+    ax1.annotate("current detect", (0,loc_detector_current), color="k")
+    ax1.axhline(y=loc_detector_current, color="gray", linestyle="--")
+    ax1.set_xlabel("Absolute position of lens, etc. (from mirror)\nblue: lens 1 (mm)\nred: focus of lens 1 FT{Lyot} plane\nblack: Barlow lens")
     #ax1.annotate("current detect", (-5,116.05), color="k")
     #ax1.axhline(y=116.05, color="gray", linestyle="--")
 
     # add absolute x axis
+    '''
     ax2 = ax1.twiny()
-    # indicate locations of FT{Lyot}
-    ax2.scatter(loc_lens1_fpt_abs, del_x_detect, color="r")
+    ax2.set_title("lens 1 displacement (mm)")
     ax2.set_xticks( ax1.get_xticks() )
     ax2.set_xbound(ax1.get_xbound())
-    ax2.set_xticklabels([loc_R1_lens_current+x for x in ax1.get_xticks()])
-    ax2.set_title("Absolute position (from mirror)")
+    ax2.set_xticklabels([x-loc_R1_lens_current for x in ax1.get_xticks()])
+
 
     # add absolute y axis
     ax3 = ax1.twinx()
     ax3.set_yticks( ax1.get_yticks() )
     ax3.set_ybound(ax1.get_ybound())
-    ax3.set_yticklabels([loc_detector_current+x for x in ax1.get_yticks()])
-    ax3.set_ylabel("Absolute position (from mirror)")
+    ax3.set_yticklabels([x-loc_detector_current for x in ax1.get_yticks()])
+    '''
 
     ax1.set_xlim([-20,150])
 
