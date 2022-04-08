@@ -26,12 +26,12 @@ f_soln3_R2_edmund_warm = 80.
 
 # (distances are measured from fold mirror upstream of relay 1
 # lens unless otherwise specified)
-soln_type = "3" # "0b" (single lens) or "3" (two positive lenses)
+soln_type = "0b" # "0b" (single lens) or "3" (two positive lenses)
 loc_R1_lens_old = 21.3 # old position (mm)
-loc_R1_lens = loc_R1_lens_old # new position (mm)
-f_R1_lens = f_soln3_R1_thor_warm # focal length of first relay lens (mm)
-loc_R2_lens = 223.85
-f_R2_lens = f_soln3_R2_thor_warm # focal length of second relay lens (mm)
+loc_R1_lens = 40. # new position (mm)
+f_R1_lens = f_soln0b_R1_edmund_warm # focal length of first relay lens (mm)
+loc_R2_lens = np.nan
+f_R2_lens = np.nan # focal length of second relay lens (mm)
 loc_cold_shield = 65.65
 loc_dewar_window = 120.25
 loc_det_old = 116.05+21.3 # for comparison
@@ -58,31 +58,24 @@ abs_mag_max = 0.6912 # mag for filling 90% of shortest dimension (buffer of 5% o
 
 so_1 = dist_lyot_to_mirror + loc_R1_lens
 
-# location of FT{Lyot} image downstream of lens 1
-loc_ft_1 = loc_R1_lens + f_R1_lens
-
-# find si1 (distance of image from first lens)
+# find si (distance of image from lens)
 si_1 = si(so_pass = so_1, f_pass = f_R1_lens)
 
-# find so2 (distance of first image from second lens)
-loc_image_1 = si_1 + loc_R1_lens
-so_2 = loc_R2_lens - loc_image_1
+# find abs location of detector to form image
+loc_det = si_1 + loc_R1_lens
 
-# find si2 (distance of final image from second lens)
-si_2 = si(so_pass = so_2, f_pass = f_R2_lens)
-
-# find abs location of detector to form image downstream of relay lens 2
-loc_det = si_2 + loc_R2_lens
+# find needed detector displacement from current
+'''
+del_x_detect = np.subtract(
+                            np.add(so_1_array,si_1_array),
+                            loc_R1_lens_current+dist_lyot_to_mirror+dist_lens_to_si_current
+                            )
+'''
 
 # find (abs val of) magnifications
 mag_1 = np.divide(si_1, so_1)
-mag_2 = np.divide(si_2, so_2)
-mag_final = mag_1*mag_2
 # relative to desired
-mag_final_rel = np.divide(mag_final,abs_mag_max)
-
-# plate scale at FT{Lyot}
-PS_ftlyot = (1./f_R1_lens)*(360./(2*np.pi))
+mag_1_rel = np.divide(mag_1,abs_mag_max)
 
 # locations of lens 1 focal points (relative to current lens)
 '''
@@ -142,9 +135,7 @@ df.to_csv("figs/" + string_foc + ".txt")
 # print stuff
 print("-------")
 print("loc_R1_lens:", loc_R1_lens)
-print("loc_R2_lens:", loc_R2_lens)
-print("loc_det FT{Lyot}:", loc_ft_1)
-print("loc_det {Lyot}:", loc_det)
+print("loc_det:", loc_det)
 
 plt.clf()
 fig, ax1 = plt.subplots(1, 1, figsize=(15,10))
@@ -153,22 +144,10 @@ fig, ax1 = plt.subplots(1, 1, figsize=(15,10))
 ax1.set_ylim([0,100])
 ax1.set_ylabel("(arbitrary)")
 
-# location of lens 1
+# locations of lens 1
 ax1.scatter(loc_R1_lens_old, 50, color="b", s=600, alpha=0.3)
 ax1.scatter(loc_R1_lens, 50, color="b", s=600)
 ax1.annotate("relay 1 lens", (loc_R1_lens, 55), color="k", rotation=90)
-
-# detector, for imaging FT{Lyot}
-ax1.annotate("new detect\nFT{Lyot}", (loc_ft_1,70), color="k")
-ax1.axvline(x=loc_ft_1, color="g", linestyle="--", linewidth=6)
-
-# location of FT{Lyot}
-ax1.scatter(loc_ft_1, 50, color="orange", s=600)
-ax1.annotate("FT{Lyot}", (loc_ft_1, 55), color="k", rotation=90)
-
-# location of lens 2
-ax1.scatter(loc_R2_lens, 50, color="r", s=600)
-ax1.annotate("relay 2 lens", (loc_R2_lens, 55), color="k", rotation=90)
 
 '''
 # indicate locations of FT{Lyot}
@@ -210,27 +189,24 @@ ax1.axvline(x=loc_dewar_window, color="gray", linestyle="--")
 #ax1.annotate("dewar window", (-5,98.95), color="k")
 #ax1.axhline(y=98.95, color="gray", linestyle="--")
 
-# detector, for imaging {Lyot}
+# current detector
 ax1.annotate("current detect", (loc_det_old,100), color="k")
 ax1.axvline(x=loc_det_old, color="g", linestyle="--", linewidth=6, alpha=0.5)
-ax1.annotate("new detect\n{Lyot}", (loc_det,70), color="k")
+ax1.annotate("new detect", (loc_det,70), color="k")
 ax1.axvline(x=loc_det, color="g", linestyle="--", linewidth=6)
 
 ax1.set_xlabel("Absolute position (from mirror)")
 #ax1.annotate("current detect", (-5,116.05), color="k")
 #ax1.axhline(y=116.05, color="gray", linestyle="--")
 
-ax1.set_xlim([-20,320])
+ax1.set_xlim([-20,150])
 
-plt.suptitle("lens 1 physical f = " + str(f_R1_lens) + " mm\n"\
-            +"lens 2 physical f = " + str(f_R2_lens) + " mm\n"\
-            +"FT{Lyot} PS= " + str(np.round(PS_ftlyot,3)) + " deg/mm\n"\
-            +"{Lyot} (i.e., 2 lens) M_total = "+str(np.round(mag_final,4)) + " (" + str(np.round(mag_final_rel,4)) +" relative to optimal)")
+plt.suptitle("lens 1 physical f = " + str(f_R1_lens) + " mm\nM = "+str(np.round(mag_1,4)) + " (" + str(np.round(mag_1_rel,4)) +" relative to optimal)")
 
 string_full = "figs/junk.png"
 #plt.tight_layout()
 plt.savefig(string_full, edgecolor="white")
-#plt.close()
+plt.close()
 print("Wrote " + string_full)
 
 #plt.show()
