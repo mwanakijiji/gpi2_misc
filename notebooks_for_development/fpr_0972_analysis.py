@@ -13,7 +13,11 @@ import numpy as np
 import glob
 
 stem = "./data/fpr_0972/"
-file_list = np.sort(glob.glob(stem + "*fits"))
+data_1 = pd.read_csv(stem + "postship_cal_movement_20221102_1.csv")
+data_2 = pd.read_csv(stem + "postship_cal_movement_20221102_2.csv")
+data_3 = pd.read_csv(stem + "postship_cal_movement_20221102_3.csv")
+
+import ipdb; ipdb.set_trace()
 
 # read in frames and put them into a big cube
 

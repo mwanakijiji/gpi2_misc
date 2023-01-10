@@ -20,27 +20,27 @@ from astropy.io import fits
 # note that the gain should be the same for these
 stem = "/Users/bandari/Documents/git.repos/gpi2_misc/data/"
 #file_name_cube = stem + "linearity_noflat_High_gain.fits"
-file_name_cube = stem + "linearity_flatfielded_Low_gain.fits"
+file_name_cube = stem + "linearity_subt_Low_gain_20221028.fits"
 
 # define subarray to use for the calculations
 
-#x0, x1, y0, y1 = 100, 250, 100, 250
+x0, x1, y0, y1 = 5, -6, 200, 400
 #x0, x1, y0, y1 = 240, 350, 330, 430
 #x0, x1, y0, y1 = 500, 600, 300, 400
-x0, x1, y0, y1 = 4, -5, 4, -5
+#x0, x1, y0, y1 = 4, -5, 4, -5
 
 # first and last indices of arrays to consider when calculating gain (may take iteration)
 index_0 = 0
-index_1 = 4
+index_1 = -1
 
 # for low gain
-array_fps = np.array([ 35,  45,  55,  65,  75,  85,  95, 105, 115, 125, 135, 145, 155, 165, 175, 185, 195, 205, 215, 225])
+array_fps = np.array([ 100,  150,  200,  250,  300,  350,  400,  450,  500,  550,  600, 650,  700,  750,  800,  850,  900,  950, 1000])
 
 # for medium gain
-#array_fps = np.array([ 45,  50,  55,  60,  65,  70,  75,  80,  85,  90,  95, 100, 105, 110, 115, 120, 125, 130, 135, 140])
+#array_fps = np.array([ 250,  300,  350,  400,  450,  500,  550,  600,  650,  700,  750, 800,  850,  900,  950, 1000])
 
 # for high gain
-#array_fps = np.array([ 15,  20,  25,  30,  35,  40,  45,  50,  55,  60,  65,  70,  75, 80,  85,  90,  95, 100, 105, 110])
+#array_fps = np.array([ 400,  500,  600,  700,  800,  900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000])
 
 ## END USER INPUTS
 
@@ -60,6 +60,8 @@ cube_0 = hdul_0[0].data
 # initialize arrays for variance, mean level
 var_adu_array = np.zeros(np.shape(cube_0)[0])
 avg_adu_array = np.zeros(np.shape(cube_0)[0])
+
+#import ipdb; ipdb.set_trace()
 
 # loop through slices, each of which represents a different fps
 for num_slice in range(0,np.shape(cube_0)[0]):
@@ -81,6 +83,8 @@ for num_slice in range(0,np.shape(cube_0)[0]):
     var_adu_array[num_slice] = var_adu
     avg_adu_array[num_slice] = avg_adu
 
+    print(var_adu)
+
 
 # calculate gain
 coeffs_array = np.polyfit(x=avg_adu_array[index_0:index_1], y=var_adu_array[index_0:index_1], deg=1)
@@ -94,7 +98,7 @@ plt.clf()
 plt.imshow(this_slice, origin="lower")
 plt.show()
 '''
-
+import ipdb; ipdb.set_trace()
 plt.clf()
 plt.plot(avg_adu_array,np.add(np.multiply(coeffs_array[0],avg_adu_array),coeffs_array[1]))
 plt.scatter(avg_adu_array,var_adu_array)

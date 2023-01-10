@@ -8,7 +8,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-stem = "/Users/bandari/Documents/git.repos/gpi2_misc/notebooks_for_development/data/fpr_0983/"
+#stem = "/Users/bandari/Documents/git.repos/gpi2_misc/notebooks_for_development/data/fpr_0983/" # pre-ship
+stem = "/Users/bandari/Documents/postdoc_notre_dame/gpi2_testing/post_ship_tests/FPR_0983_aowfs_pointing/raw_data/" # post-ship
 
 df_large = pd.read_csv(stem + "large_steps.txt", delim_whitespace=True)
 df_small = pd.read_csv(stem + "small_steps.txt", delim_whitespace=True)

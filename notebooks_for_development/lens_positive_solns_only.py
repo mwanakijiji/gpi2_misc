@@ -30,15 +30,13 @@ def si(so_pass,f_pass):
 # set the new location of the relay lens 1
 loc_lens1_abs = loc_R1_lens_current
 
-# set a focal length so that the FT{Lyot} is just downstream of the current detector location
+# set a focal length so that the FT{Lyot} is a few mm downstream of the current detector location
 # (this gives us some room, so that we can move the detector back and capture that image)
 
-detect_downstream_offset = 5. # (mm)
+detect_downstream_offset = 33.45 # (mm)
 
 # needed focal length of relay 1 lens
 f1_new = loc_detector_current - loc_lens1_abs + detect_downstream_offset
-
-print("f1 new: ", f1_new)
 
 # location of the plane for imaging FT{Lyot} (i.e., plane where there is focal point
 # of relay lens 1); this is where the detector would have to be for imaging FT{Lyot}
@@ -72,6 +70,7 @@ for num_foc in range(0,len(f2_test)):
     M2 = (si2_rel/so2)
     M_total = M1*M2
 
+    print("f1 new: ", f1_new)
     print("PS_1", PS_1)
     print("f2", f2_test[num_foc])
     print("loc_R2_lens", loc_R2_lens)

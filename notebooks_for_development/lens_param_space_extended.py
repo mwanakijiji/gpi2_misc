@@ -36,13 +36,13 @@ def f_needed(so_pass,si_pass):
 
 # try moving lens; note these are relative movements
 # (+: downstream; -: upstream)
-del_x_lens = np.arange(-10., 130., step=5.0) # displacement of lens (might be bumping into walls and elements)
+del_x_lens = np.arange(-30., 130., step=3.0) # displacement of lens (might be bumping into walls and elements)
 
 # distance between object and lens
 so_1_array = np.add(dist_lyot_to_mirror+loc_R1_lens_current, del_x_lens)
 
 # choices of lens 1 focal lengths
-foc_lens_1_test = np.linspace(50., 70., num=41)
+foc_lens_1_test = np.linspace(20., 140., num=101)
 
 # set mangification of Lyot stop in detector
 #abs_mag_max = 0.738 # mag for 10 pixel buffer on each side
